@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蓝柚 - 优雅生活，从这里开始</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="蓝柚">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+</head>
+<body class="bg-white">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-blue-600">蓝柚</a>
+                </div>
+                <!-- 移动端菜单按钮 -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-600 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+                <!-- 桌面端导航 -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-blue-600">首页</a>
+                    <a href="products.html" class="text-gray-700 hover:text-blue-600">产品系列</a>
+                    <a href="story.html" class="text-gray-700 hover:text-blue-600">品牌故事</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600">联系我们</a>
+                    <a href="gallery.html" class="text-gray-700 hover:text-blue-600">作品展示</a>
+                            <a href="style-selector.html" class="text-gray-700 hover:text-blue-600">风格选择</a>
+                    <a href="booking.html" class="text-gray-700 hover:text-blue-600">在线预约</a>
+                    <a href="message.html" class="text-gray-700 hover:text-blue-600">留言板</a>
+                </div>
+            </div>
+            <!-- 移动端导航菜单 -->
+            <div id="mobile-menu" class="md:hidden hidden absolute top-16 left-0 right-0 bg-white shadow-lg">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="index.html" class="block px-3 py-2 text-blue-600 font-medium">首页</a>
+                    <a href="products.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">产品系列</a>
+                    <a href="story.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">品牌故事</a>
+                    <a href="contact.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">联系我们</a>
+                    <a href="gallery.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">作品展示</a>
+                        <a href="style-selector.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">风格选择</a>
+                    <a href="booking.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">在线预约</a>
+                    <a href="message.html" class="block px-3 py-2 text-gray-700 hover:text-blue-600">留言板</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <div class="relative h-screen">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-90"></div>
+        <div class="relative h-full flex items-center justify-center text-center text-white">
+            <div class="max-w-3xl px-4">
+                <h1 class="text-5xl font-bold mb-4">优雅生活，从这里开始</h1>
+                <p class="text-xl mb-8">探索蓝柚的精致世界，感受品质生活的美好</p>
+                <div class="space-x-4">
+                    <a href="booking.html" class="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition duration-300 inline-block">
+                        立即预约
+                    </a>
+                    <a href="gallery.html" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition duration-300 inline-block">
+                        查看作品
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 产品展示区 -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">精选产品</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 产品卡片 1 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="h-64 bg-blue-200"></div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">证件照</h3>
+                        <p class="text-gray-600">传承经典，演绎永恒</p>
+                    </div>
+                </div>
+                <!-- 产品卡片 2 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="h-64 bg-purple-200"></div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">轻写真</h3>
+                        <p class="text-gray-600">引领潮流，展现个性</p>
+                    </div>
+                </div>
+                <!-- 产品卡片 3 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="h-64 bg-pink-200"></div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">结婚登记照</h3>
+                        <p class="text-gray-600">独特设计，限量珍藏</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4">蓝柚</h4>
+                    <p class="text-gray-400">优雅生活，从这里开始</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">快速链接</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">关于我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">产品系列</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">新闻中心</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">联系我们</h4>
+                    <ul class="space-y-2">
+                        <li class="text-gray-400">电话：18584312395</li>
+                        <li class="text-gray-400">邮箱：a13927467@outlook.com</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">关注我们</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">微信</a>
+                        <a href="#" class="text-gray-400 hover:text-white">Instagram</a>
+                        <a href="#" class="text-gray-400 hover:text-white">抖音</a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 蓝柚. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/advanced.js"></script>
+    <script src="js/pwa.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

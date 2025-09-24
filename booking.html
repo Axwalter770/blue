@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线预约 - 蓝柚</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .booking-step {
+            transition: all 0.3s ease;
+        }
+        .booking-step.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .booking-step.completed {
+            background: #10b981;
+            color: white;
+        }
+        .service-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .service-card.selected {
+            border: 2px solid #667eea;
+            background: #f0f4ff;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+        .calendar-day {
+            background: white;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .calendar-day:hover {
+            background: #f3f4f6;
+        }
+        .calendar-day.disabled {
+            background: #f9fafb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .calendar-day.selected {
+            background: #667eea;
+            color: white;
+        }
+        .calendar-day.today {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .time-slot {
+            border: 2px solid #e5e7eb;
+            padding: 12px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        .time-slot:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .time-slot.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .time-slot.disabled {
+            background: #f9fafb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+        }
+        .photographer-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .photographer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .photographer-card.selected {
+            border: 2px solid #667eea;
+            background: #f0f4ff;
+        }
+        .payment-method {
+            border: 2px solid #e5e7eb;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        .payment-method:hover {
+            border-color: #667eea;
+        }
+        .payment-method.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-blue-600">蓝柚</a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-600">首页</a>
+                    <a href="products.html" class="text-gray-700 hover:text-blue-600">产品系列</a>
+                    <a href="story.html" class="text-gray-700 hover:text-blue-600">品牌故事</a>
+                    <a href="contact.html" class="text-gray-700 hover:text-blue-600">联系我们</a>
+                    <a href="booking.html" class="text-blue-600">在线预约</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-20 pb-8">
+        <div class="max-w-6xl mx-auto px-4">
+            <!-- 页面标题 -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">在线预约</h1>
+                <p class="text-gray-600">简单几步，轻松预约您的专属拍摄时间</p>
+            </div>
+
+            <!-- 步骤指示器 -->
+            <div class="flex justify-center mb-8">
+                <div class="flex items-center space-x-4">
+                    <div class="booking-step active w-10 h-10 rounded-full flex items-center justify-center font-bold" data-step="1">1</div>
+                    <div class="w-16 h-0.5 bg-gray-300"></div>
+                    <div class="booking-step w-10 h-10 rounded-full flex items-center justify-center font-bold bg-gray-300" data-step="2">2</div>
+                    <div class="w-16 h-0.5 bg-gray-300"></div>
+                    <div class="booking-step w-10 h-10 rounded-full flex items-center justify-center font-bold bg-gray-300" data-step="3">3</div>
+                    <div class="w-16 h-0.5 bg-gray-300"></div>
+                    <div class="booking-step w-10 h-10 rounded-full flex items-center justify-center font-bold bg-gray-300" data-step="4">4</div>
+                    <div class="w-16 h-0.5 bg-gray-300"></div>
+                    <div class="booking-step w-10 h-10 rounded-full flex items-center justify-center font-bold bg-gray-300" data-step="5">5</div>
+                </div>
+            </div>
+
+            <!-- 步骤标题 -->
+            <div class="text-center mb-8">
+                <h2 id="stepTitle" class="text-2xl font-bold text-gray-800">选择服务类型</h2>
+                <p id="stepDescription" class="text-gray-600 mt-2">请选择您需要的拍摄服务</p>
+            </div>
+
+            <!-- 预约表单 -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <!-- 步骤1: 选择服务 -->
+                <div id="step1" class="step-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="service-card bg-white rounded-lg shadow-md p-6 border-2 border-gray-200" data-service="id-photo" data-price="88">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-id-card text-blue-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">证件照</h3>
+                                <p class="text-gray-600 mb-4">专业证件照拍摄，符合各类证件要求</p>
+                                <div class="text-2xl font-bold text-blue-600 mb-4">¥68</div>
+                                <ul class="text-sm text-gray-600 text-left space-y-1">
+                                    <li>✓ 专业拍摄</li>
+                                    <li>✓ 精美修图</li>
+                                    <li>✓ 电子版照片</li>
+                                    <li>✓ 快速出片</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="service-card bg-white rounded-lg shadow-md p-6 border-2 border-gray-200" data-service="portrait" data-price="398">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-purple-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-camera text-purple-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">轻写真</h3>
+                                <p class="text-gray-600 mb-4">自然轻松的写真拍摄，展现真实美好</p>
+                                <div class="text-2xl font-bold text-purple-600 mb-4">¥85</div>
+                                <ul class="text-sm text-gray-600 text-left space-y-1">
+                                    <li>✓ 多种风格</li>
+                                    <li>✓ 专业指导</li>
+                                    <li>✓ 精美后期</li>
+                                    <li>✓ 专业化妆</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="service-card bg-white rounded-lg shadow-md p-6 border-2 border-gray-200" data-service="wedding" data-price="588">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-pink-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-heart text-pink-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">结婚登记照</h3>
+                                <p class="text-gray-600 mb-4">甜蜜幸福的结婚登记照拍摄</p>
+                                <div class="text-2xl font-bold text-pink-600 mb-4">¥119</div>
+                                <ul class="text-sm text-gray-600 text-left space-y-1">
+                                    <li>✓ 浪漫风格</li>
+                                    <li>✓ 情侣指导</li>
+                                    <li>✓ 精美修图</li>
+                                    <li>✓ 多种规格</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤2: 选择摄影师 -->
+                <div id="step2" class="step-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="photographer-card bg-white rounded-lg shadow-md p-6 border-2 border-gray-200" data-photographer="1">
+                            <div class="text-center">
+                                <div class="w-24 h-24 bg-blue-200 rounded-full mx-auto mb-4"></div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-1">郝伟大的老师</h3>
+                                <p class="text-gray-600 mb-2">首席摄影师</p>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="flex text-yellow-400">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="ml-2 text-gray-600">5.0</span>
+                                </div>
+                                <p class="text-sm text-gray-600">100年摄影经验，专业证件照拍摄</p>
+                            </div>
+                        </div>
+
+                        <div class="photographer-card bg-white rounded-lg shadow-md p-6 border-2 border-gray-200" data-photographer="2">
+                            <div class="text-center">
+                                <div class="w-24 h-24 bg-purple-200 rounded-full mx-auto mb-4"></div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-1">还是郝伟大的老师</h3>
+                                <p class="text-gray-600 mb-2">资深摄影师</p>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="flex text-yellow-400">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="ml-2 text-gray-600">4.9</span>
+                                </div>
+                                <p class="text-sm text-gray-600">8年摄影经验，擅长人像写真</p>
+                            </div>
+                        </div>
+
+                        <div class="photographer-card bg-white rounded-lg shadow-md p-6 border-2 border-gray-200" data-photographer="3">
+                            <div class="text-center">
+                                <div class="w-24 h-24 bg-pink-200 rounded-full mx-auto mb-4"></div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-1">郝郝郝老师</h3>
+                                <p class="text-gray-600 mb-2">金牌摄影师</p>
+                                <div class="flex items-center justify-center mb-3">
+                                    <div class="flex text-yellow-400">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="ml-2 text-gray-600">4.8</span>
+                                </div>
+                                <p class="text-sm text-gray-600">6年摄影经验，专业婚纱摄影</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤3: 选择日期 -->
+                <div id="step3" class="step-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">选择日期</h3>
+                            <div class="calendar-container">
+                                <div class="flex justify-between items-center mb-4">
+                                    <button id="prevMonth" class="p-2 text-gray-600 hover:text-gray-800">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h4 id="currentMonth" class="text-lg font-semibold">2024年3月</h4>
+                                    <button id="nextMonth" class="p-2 text-gray-600 hover:text-gray-800">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="calendar">
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">日</div>
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">一</div>
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">二</div>
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">三</div>
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">四</div>
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">五</div>
+                                    <div class="calendar-day font-semibold text-gray-600 bg-gray-100">六</div>
+                                    <!-- 日期将通过JavaScript动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">选择时间</h3>
+                            <div id="timeSlots" class="grid grid-cols-2 gap-3">
+                                <!-- 时间段将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤4: 填写信息 -->
+                <div id="step4" class="step-content">
+                    <div class="max-w-md mx-auto">
+                        <form id="customerInfo" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 mb-2">姓名 *</label>
+                                <input type="text" id="customerName" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 mb-2">手机号 *</label>
+                                <input type="tel" id="customerPhone" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 mb-2">邮箱</label>
+                                <input type="email" id="customerEmail" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 mb-2">特殊要求</label>
+                                <textarea id="customerRequirements" rows="4" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="请描述您的特殊要求或需求"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 步骤5: 确认支付 -->
+                <div id="step5" class="step-content">
+                    <div class="max-w-2xl mx-auto">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- 预约信息确认 -->
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-6">预约信息确认</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between py-2 border-b">
+                                        <span class="text-gray-600">服务类型：</span>
+                                        <span id="confirmService" class="font-semibold">-</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b">
+                                        <span class="text-gray-600">摄影师：</span>
+                                        <span id="confirmPhotographer" class="font-semibold">-</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b">
+                                        <span class="text-gray-600">预约时间：</span>
+                                        <span id="confirmDateTime" class="font-semibold">-</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b">
+                                        <span class="text-gray-600">联系人：</span>
+                                        <span id="confirmName" class="font-semibold">-</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b">
+                                        <span class="text-gray-600">手机号：</span>
+                                        <span id="confirmPhone" class="font-semibold">-</span>
+                                    </div>
+                                    <div class="flex justify-between py-3 text-xl font-bold text-blue-600">
+                                        <span>总计：</span>
+                                        <span id="confirmPrice">¥0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 支付方式 -->
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-6">选择支付方式</h3>
+                                <div class="space-y-4">
+                                    <div class="payment-method" data-method="wechat">
+                                        <div class="flex items-center">
+                                            <i class="fab fa-weixin text-green-600 text-2xl mr-4"></i>
+                                            <div>
+                                                <h4 class="font-semibold">微信支付</h4>
+                                                <p class="text-sm text-gray-600">使用微信扫码支付</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-method" data-method="alipay">
+                                        <div class="flex items-center">
+                                            <i class="fab fa-alipay text-blue-600 text-2xl mr-4"></i>
+                                            <div>
+                                                <h4 class="font-semibold">支付宝</h4>
+                                                <p class="text-sm text-gray-600">使用支付宝扫码支付</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="payment-method" data-method="offline">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-store text-purple-600 text-2xl mr-4"></i>
+                                            <div>
+                                                <h4 class="font-semibold">到店支付</h4>
+                                                <p class="text-sm text-gray-600">到店后现金或刷卡支付</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="flex justify-between mt-8">
+                    <button id="prevBtn" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        上一步
+                    </button>
+                    <button id="nextBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        下一步
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示弹窗 -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <i class="fas fa-check text-green-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">预约成功！</h3>
+            <p class="text-gray-600 mb-6">我们会在24小时内联系您确认预约信息</p>
+            <div class="space-y-3">
+                <button class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700" onclick="window.location.href='user-center.html'">
+                    查看我的预约
+                </button>
+                <button class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50" onclick="window.location.href='index.html'">
+                    返回首页
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/advanced.js"></script>
+    <script>
+        let currentStep = 1;
+        let bookingData = {
+            service: null,
+            photographer: null,
+            date: null,
+            time: null,
+            customer: {}
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeBooking();
+        });
+
+        function initializeBooking() {
+            // 服务选择
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    bookingData.service = {
+                        type: this.getAttribute('data-service'),
+                        price: parseInt(this.getAttribute('data-price')),
+                        name: this.querySelector('h3').textContent
+                    };
+                    
+                    updateNextButton();
+                });
+            });
+
+            // 摄影师选择
+            document.querySelectorAll('.photographer-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.photographer-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    bookingData.photographer = {
+                        id: this.getAttribute('data-photographer'),
+                        name: this.querySelector('h3').textContent
+                    };
+                    
+                    updateNextButton();
+                });
+            });
+
+            // 支付方式选择
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    bookingData.paymentMethod = this.getAttribute('data-method');
+                    updateNextButton();
+                });
+            });
+
+            // 按钮事件
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            document.getElementById('prevBtn').addEventListener('click', prevStep);
+
+            // 初始化日历
+            initializeCalendar();
+            
+            // 表单验证
+            document.getElementById('customerInfo').addEventListener('input', validateCustomerInfo);
+        }
+
+        function nextStep() {
+            if (currentStep < 5) {
+                if (currentStep === 4) {
+                    // 验证表单
+                    if (!validateCustomerInfo()) {
+                        return;
+                    }
+                    
+                    // 收集客户信息
+                    bookingData.customer = {
+                        name: document.getElementById('customerName').value,
+                        phone: document.getElementById('customerPhone').value,
+                        email: document.getElementById('customerEmail').value,
+                        requirements: document.getElementById('customerRequirements').value
+                    };
+                    
+                    // 更新确认信息
+                    updateConfirmation();
+                }
+                
+                if (currentStep === 5) {
+                    // 提交预约
+                    submitBooking();
+                    return;
+                }
+                
+                currentStep++;
+                updateStepDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        }
+
+        function updateStepDisplay() {
+            // 更新步骤指示器
+            document.querySelectorAll('.booking-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.remove('active', 'completed');
+                
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // 更新内容区域
+            document.querySelectorAll('.step-content').forEach((content, index) => {
+                content.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    content.classList.add('active');
+                }
+            });
+
+            // 更新标题和描述
+            const titles = [
+                '选择服务类型',
+                '选择摄影师',
+                '选择日期时间',
+                '填写预约信息',
+                '确认并支付'
+            ];
+            
+            const descriptions = [
+                '请选择您需要的拍摄服务',
+                '选择您喜欢的专业摄影师',
+                '选择合适的拍摄日期和时间',
+                '请填写您的联系信息',
+                '确认预约信息并选择支付方式'
+            ];
+
+            document.getElementById('stepTitle').textContent = titles[currentStep - 1];
+            document.getElementById('stepDescription').textContent = descriptions[currentStep - 1];
+
+            // 更新按钮状态
+            document.getElementById('prevBtn').disabled = currentStep === 1;
+            document.getElementById('nextBtn').textContent = currentStep === 5 ? '确认预约' : '下一步';
+            
+            updateNextButton();
+        }
+
+        function updateNextButton() {
+            const nextBtn = document.getElementById('nextBtn');
+            let canProceed = false;
+
+            switch (currentStep) {
+                case 1:
+                    canProceed = bookingData.service !== null;
+                    break;
+                case 2:
+                    canProceed = bookingData.photographer !== null;
+                    break;
+                case 3:
+                    canProceed = bookingData.date !== null && bookingData.time !== null;
+                    break;
+                case 4:
+                    canProceed = validateCustomerInfo();
+                    break;
+                case 5:
+                    canProceed = bookingData.paymentMethod !== undefined;
+                    break;
+            }
+
+            nextBtn.disabled = !canProceed;
+        }
+
+        function initializeCalendar() {
+            const currentDate = new Date();
+            let currentMonth = currentDate.getMonth();
+            let currentYear = currentDate.getFullYear();
+
+            function renderCalendar() {
+                const calendar = document.querySelector('.calendar');
+                const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                
+                document.getElementById('currentMonth').textContent = `${currentYear}年${monthNames[currentMonth]}`;
+                
+                // 清除现有日期（保留表头）
+                const existingDays = calendar.querySelectorAll('.calendar-day:not(.font-semibold)');
+                existingDays.forEach(day => day.remove());
+                
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - firstDay.getDay());
+                
+                for (let i = 0; i < 42; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    dayElement.textContent = date.getDate();
+                    
+                    // 添加样式
+                    if (date.getMonth() !== currentMonth) {
+                        dayElement.classList.add('disabled');
+                    } else if (date < currentDate) {
+                        dayElement.classList.add('disabled');
+                    } else {
+                        dayElement.addEventListener('click', function() {
+                            document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+                            this.classList.add('selected');
+                            
+                            bookingData.date = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                            generateTimeSlots();
+                            updateNextButton();
+                        });
+                    }
+                    
+                    // 今天的样式
+                    if (date.toDateString() === currentDate.toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    calendar.appendChild(dayElement);
+                }
+            }
+
+            document.getElementById('prevMonth').addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar();
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar();
+            });
+
+            renderCalendar();
+        }
+
+        function generateTimeSlots() {
+            const timeSlots = document.getElementById('timeSlots');
+            timeSlots.innerHTML = '';
+            
+            const slots = [
+                '09:00-10:00', '10:00-11:00', '11:00-12:00',
+                '14:00-15:00', '15:00-16:00', '16:00-17:00',
+                '17:00-18:00', '18:00-19:00'
+            ];
+            
+            slots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot;
+                
+                // 随机禁用一些时间段（模拟已被预约）
+                if (Math.random() < 0.3) {
+                    slotElement.classList.add('disabled');
+                    slotElement.innerHTML += '<br><small>已预约</small>';
+                } else {
+                    slotElement.addEventListener('click', function() {
+                        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                        this.classList.add('selected');
+                        
+                        bookingData.time = slot;
+                        updateNextButton();
+                    });
+                }
+                
+                timeSlots.appendChild(slotElement);
+            });
+        }
+
+        function validateCustomerInfo() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            
+            return name !== '' && phone !== '' && /^1[3-9]\d{9}$/.test(phone);
+        }
+
+        function updateConfirmation() {
+            document.getElementById('confirmService').textContent = bookingData.service.name;
+            document.getElementById('confirmPhotographer').textContent = bookingData.photographer.name;
+            document.getElementById('confirmDateTime').textContent = `${bookingData.date} ${bookingData.time}`;
+            document.getElementById('confirmName').textContent = bookingData.customer.name;
+            document.getElementById('confirmPhone').textContent = bookingData.customer.phone;
+            document.getElementById('confirmPrice').textContent = `¥${bookingData.service.price}`;
+        }
+
+        async function submitBooking() {
+            try {
+                // 显示加载状态
+                document.getElementById('nextBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>处理中...';
+                document.getElementById('nextBtn').disabled = true;
+                
+                // 模拟提交延迟
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 显示成功弹窗
+                document.getElementById('successModal').classList.remove('hidden');
+                
+                // 保存预约信息到本地存储
+                const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+                bookings.push({
+                    id: Date.now(),
+                    ...bookingData,
+                    status: 'confirmed',
+                    createdAt: new Date().toISOString()
+                });
+                localStorage.setItem('userBookings', JSON.stringify(bookings));
+                
+            } catch (error) {
+                alert('预约提交失败，请重试');
+                document.getElementById('nextBtn').innerHTML = '确认预约';
+                document.getElementById('nextBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+

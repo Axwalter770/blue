@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员中心 - 蓝柚</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            items-center: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin: 0 auto;
+        }
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .mobile-overlay {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 移动端头部 -->
+    <div class="md:hidden bg-white shadow-sm p-4 flex items-center justify-between">
+        <button id="mobileMenuBtn" class="text-gray-600">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <h1 class="text-xl font-bold text-gray-800">会员中心</h1>
+        <a href="index.html" class="text-blue-600">
+            <i class="fas fa-home text-xl"></i>
+        </a>
+    </div>
+
+    <!-- 移动端遮罩 -->
+    <div id="mobileOverlay" class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20 hidden"></div>
+
+    <div class="flex min-h-screen">
+        <!-- 侧边栏 -->
+        <div id="sidebar" class="sidebar w-64 fixed md:relative h-full z-30 text-white">
+            <div class="p-6">
+                <!-- 用户信息 -->
+                <div class="text-center mb-8">
+                    <div class="avatar mb-4">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 class="text-xl font-bold" id="userName">用户名</h3>
+                    <p class="text-blue-200 text-sm" id="userLevel">普通会员</p>
+                    <div class="mt-3">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%"></div>
+                        </div>
+                        <p class="text-xs text-blue-200 mt-1">经验值：600/1000</p>
+                    </div>
+                </div>
+
+                <!-- 导航菜单 -->
+                <nav class="space-y-2">
+                    <a href="#" class="sidebar-item active flex items-center px-4 py-3 rounded-lg" data-section="overview">
+                        <i class="fas fa-tachometer-alt w-5"></i>
+                        <span class="ml-3">概览</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="bookings">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span class="ml-3">我的预约</span>
+                        <span class="notification-badge ml-auto">3</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="photos">
+                        <i class="fas fa-images w-5"></i>
+                        <span class="ml-3">我的照片</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="orders">
+                        <i class="fas fa-shopping-bag w-5"></i>
+                        <span class="ml-3">订单管理</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="profile">
+                        <i class="fas fa-user-cog w-5"></i>
+                        <span class="ml-3">个人设置</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="messages">
+                        <i class="fas fa-envelope w-5"></i>
+                        <span class="ml-3">消息中心</span>
+                        <span class="notification-badge ml-auto">2</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="wallet">
+                        <i class="fas fa-wallet w-5"></i>
+                        <span class="ml-3">钱包</span>
+                    </a>
+                </nav>
+
+                <!-- 退出登录 -->
+                <div class="mt-8 pt-8 border-t border-blue-300">
+                    <a href="index.html" class="sidebar-item flex items-center px-4 py-3 rounded-lg text-blue-200 hover:text-white">
+                        <i class="fas fa-home w-5"></i>
+                        <span class="ml-3">返回首页</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg text-blue-200 hover:text-white" onclick="logout()">
+                        <i class="fas fa-sign-out-alt w-5"></i>
+                        <span class="ml-3">退出登录</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 md:ml-0 p-6">
+            <!-- 概览页面 -->
+            <div id="overview" class="content-section active">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">账户概览</h2>
+                
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="card p-6">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">总预约次数</p>
+                                <p class="text-2xl font-bold text-gray-800">12</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-images text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">照片总数</p>
+                                <p class="text-2xl font-bold text-gray-800">156</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <i class="fas fa-star text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">会员积分</p>
+                                <p class="text-2xl font-bold text-gray-800">2,580</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600 text-sm">余额</p>
+                                <p class="text-2xl font-bold text-gray-800">¥2,150</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">最近预约</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-semibold text-gray-800">轻写真拍摄</p>
+                                    <p class="text-sm text-gray-600">2024-03-20 14:00</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">已完成</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-semibold text-gray-800">证件照拍摄</p>
+                                    <p class="text-sm text-gray-600">2024-03-25 10:00</p>
+                                </div>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">已预约</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">系统通知</h3>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                <p class="text-sm text-blue-800">您的轻写真照片已处理完成，可以下载了</p>
+                                <p class="text-xs text-blue-600 mt-1">2小时前</p>
+                            </div>
+                            <div class="p-3 bg-green-50 border-l-4 border-green-400 rounded">
+                                <p class="text-sm text-green-800">恭喜您获得100积分奖励</p>
+                                <p class="text-xs text-green-600 mt-1">1天前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的预约 -->
+            <div id="bookings" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">我的预约</h2>
+                
+                <!-- 标签页 -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="flex space-x-8">
+                        <button class="tab-button active" data-tab="all">全部预约</button>
+                        <button class="tab-button" data-tab="upcoming">即将到来</button>
+                        <button class="tab-button" data-tab="completed">已完成</button>
+                        <button class="tab-button" data-tab="cancelled">已取消</button>
+                    </nav>
+                </div>
+
+                <div class="tab-content active" id="all">
+                    <div class="space-y-4">
+                        <div class="card p-6">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-camera text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">轻写真拍摄</h3>
+                                        <p class="text-gray-600">预约时间：2024-03-25 14:00-16:00</p>
+                                        <p class="text-gray-600">摄影师：李老师</p>
+                                        <p class="text-gray-600">地点：蓝柚摄影工作室</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">已预约</span>
+                                    <p class="text-lg font-bold text-gray-800 mt-2">¥398</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex space-x-3">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">查看详情</button>
+                                <button class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50">修改预约</button>
+                                <button class="border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50">取消预约</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-6">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-id-card text-green-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">证件照拍摄</h3>
+                                        <p class="text-gray-600">预约时间：2024-03-20 10:00-11:00</p>
+                                        <p class="text-gray-600">摄影师：王老师</p>
+                                        <p class="text-gray-600">地点：蓝柚摄影工作室</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">已完成</span>
+                                    <p class="text-lg font-bold text-gray-800 mt-2">¥88</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex space-x-3">
+                                <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">下载照片</button>
+                                <button class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50">评价服务</button>
+                                <button class="border border-blue-300 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50">再次预约</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的照片 -->
+            <div id="photos" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">我的照片</h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div class="card overflow-hidden">
+                        <div class="aspect-w-4 aspect-h-3">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb" alt="证件照" class="w-full h-48 object-cover">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800">证件照</h3>
+                            <p class="text-sm text-gray-600">2024-03-20</p>
+                            <div class="mt-3 flex space-x-2">
+                                <button class="flex-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">下载</button>
+                                <button class="flex-1 border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-50">分享</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card overflow-hidden">
+                        <div class="aspect-w-4 aspect-h-3">
+                            <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e" alt="写真" class="w-full h-48 object-cover">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800">轻写真</h3>
+                            <p class="text-sm text-gray-600">2024-03-15</p>
+                            <div class="mt-3 flex space-x-2">
+                                <button class="flex-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">下载</button>
+                                <button class="flex-1 border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-50">分享</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他内容区域占位 -->
+            <div id="orders" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">订单管理</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-shopping-bag text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">订单管理功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="profile" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">个人设置</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-user-cog text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">个人设置功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="messages" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">消息中心</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-envelope text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">消息中心功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="wallet" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">钱包</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-wallet text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">钱包功能开发中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/advanced.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏导航
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除活动状态
+                    sidebarItems.forEach(si => si.classList.remove('active'));
+                    contentSections.forEach(cs => cs.classList.remove('active'));
+                    
+                    // 添加活动状态
+                    this.classList.add('active');
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        document.getElementById(sectionId).classList.add('active');
+                    }
+                    
+                    // 移动端关闭侧边栏
+                    if (window.innerWidth < 768) {
+                        document.getElementById('sidebar').classList.remove('open');
+                        document.getElementById('mobileOverlay').classList.add('hidden');
+                    }
+                });
+            });
+
+            // 标签页切换
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除活动状态
+                    tabButtons.forEach(tb => tb.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // 添加活动状态
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    if (tabId) {
+                        document.getElementById(tabId).classList.add('active');
+                    }
+                });
+            });
+
+            // 移动端菜单
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                sidebar.classList.add('open');
+                mobileOverlay.classList.remove('hidden');
+            });
+            
+            mobileOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                mobileOverlay.classList.add('hidden');
+            });
+
+            // 加载用户信息
+            loadUserInfo();
+        });
+
+        // 加载用户信息
+        function loadUserInfo() {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('userName').textContent = user.username || '未知用户';
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('userData');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // 页面加载时检查登录状态
+        checkLoginStatus();
+    </script>
+</body>
+</html>
+

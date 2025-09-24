@@ -1,0 +1,835 @@
+/**
+ * 专业3D视觉效果库
+ * 高端三维变换和视觉特效
+ */
+
+/* ============================================
+   3D基础配置和变量
+============================================ */
+:root {
+  /* 3D效果变量 */
+  --perspective-near: 500px;
+  --perspective-far: 1000px;
+  --perspective-ultra: 2000px;
+  
+  /* 3D旋转角度 */
+  --rotate-x-subtle: 5deg;
+  --rotate-x-moderate: 15deg;
+  --rotate-x-dramatic: 30deg;
+  --rotate-y-subtle: 5deg;
+  --rotate-y-moderate: 15deg;
+  --rotate-y-dramatic: 30deg;
+  
+  /* 3D深度层级 */
+  --depth-level-1: 10px;
+  --depth-level-2: 25px;
+  --depth-level-3: 50px;
+  --depth-level-4: 100px;
+  --depth-level-5: 200px;
+  
+  /* 3D阴影 */
+  --shadow-3d-subtle: 0 5px 15px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.05);
+  --shadow-3d-moderate: 0 10px 30px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1);
+  --shadow-3d-dramatic: 0 20px 60px rgba(0, 0, 0, 0.2), 0 10px 20px rgba(0, 0, 0, 0.15);
+  --shadow-3d-extreme: 0 40px 120px rgba(0, 0, 0, 0.25), 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   3D容器和基础类
+============================================ */
+.perspective-container {
+  perspective: var(--perspective-far);
+  perspective-origin: center center;
+}
+
+.perspective-near {
+  perspective: var(--perspective-near);
+}
+
+.perspective-far {
+  perspective: var(--perspective-far);
+}
+
+.perspective-ultra {
+  perspective: var(--perspective-ultra);
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.backface-visible {
+  backface-visibility: visible;
+}
+
+/* ============================================
+   3D卡片翻转效果
+============================================ */
+.card-3d {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-3d.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-3d-front,
+.card-3d-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  box-shadow: var(--shadow-3d-moderate);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.card-3d-front {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.card-3d-back {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: white;
+  transform: rotateY(180deg);
+}
+
+/* 3D卡片悬停效果 */
+.card-3d-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.card-3d-hover:hover {
+  transform: perspective(1000px) rotateX(var(--rotate-x-subtle)) rotateY(var(--rotate-y-subtle)) translateZ(var(--depth-level-2));
+  box-shadow: var(--shadow-3d-dramatic);
+}
+
+/* ============================================
+   3D按钮效果
+============================================ */
+.btn-3d {
+  position: relative;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  box-shadow: 
+    0 4px 8px rgba(102, 126, 234, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.btn-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  border-radius: inherit;
+  transform: translateZ(1px);
+}
+
+.btn-3d:hover {
+  transform: perspective(500px) rotateX(-5deg) translateY(-2px) translateZ(10px);
+  box-shadow: 
+    0 8px 25px rgba(102, 126, 234, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+.btn-3d:active {
+  transform: perspective(500px) rotateX(5deg) translateY(1px) translateZ(5px);
+  box-shadow: 
+    0 2px 10px rgba(102, 126, 234, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* 按钮深度变体 */
+.btn-3d-deep {
+  box-shadow: 
+    0 6px 0 #5a67d8,
+    0 8px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-3d-deep:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 0 #5a67d8,
+    0 12px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-3d-deep:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 4px 0 #5a67d8,
+    0 6px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================
+   3D立方体动画
+============================================ */
+.cube-3d {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rotateCube 10s infinite linear;
+  margin: 50px auto;
+}
+
+.cube-face {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(102, 126, 234, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.cube-front {
+  transform: rotateY(0deg) translateZ(100px);
+}
+
+.cube-back {
+  transform: rotateY(180deg) translateZ(100px);
+}
+
+.cube-right {
+  transform: rotateY(90deg) translateZ(100px);
+}
+
+.cube-left {
+  transform: rotateY(-90deg) translateZ(100px);
+}
+
+.cube-top {
+  transform: rotateX(90deg) translateZ(100px);
+}
+
+.cube-bottom {
+  transform: rotateX(-90deg) translateZ(100px);
+}
+
+@keyframes rotateCube {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: rotateX(90deg) rotateY(0deg);
+  }
+  50% {
+    transform: rotateX(90deg) rotateY(90deg);
+  }
+  75% {
+    transform: rotateX(0deg) rotateY(90deg);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+}
+
+/* ============================================
+   3D图片画廊效果
+============================================ */
+.gallery-3d {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+  height: 400px;
+  overflow: hidden;
+}
+
+.gallery-3d-item {
+  position: absolute;
+  width: 250px;
+  height: 350px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-3d-moderate);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.gallery-3d-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.gallery-3d-item:nth-child(1) {
+  transform: translateX(-200px) rotateY(35deg) scale(0.8);
+  z-index: 1;
+}
+
+.gallery-3d-item:nth-child(2) {
+  transform: translateX(-100px) rotateY(15deg) scale(0.9);
+  z-index: 2;
+}
+
+.gallery-3d-item:nth-child(3) {
+  transform: translateX(0) rotateY(0deg) scale(1);
+  z-index: 3;
+  box-shadow: var(--shadow-3d-dramatic);
+}
+
+.gallery-3d-item:nth-child(4) {
+  transform: translateX(100px) rotateY(-15deg) scale(0.9);
+  z-index: 2;
+}
+
+.gallery-3d-item:nth-child(5) {
+  transform: translateX(200px) rotateY(-35deg) scale(0.8);
+  z-index: 1;
+}
+
+.gallery-3d-item:hover {
+  transform: scale(1.05) translateZ(20px);
+  box-shadow: var(--shadow-3d-extreme);
+}
+
+/* ============================================
+   3D文字效果
+============================================ */
+.text-3d {
+  font-size: 4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+}
+
+.text-3d::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  color: rgba(102, 126, 234, 0.3);
+  transform: 
+    translateX(2px) 
+    translateY(2px) 
+    translateZ(-1px);
+}
+
+.text-3d-extruded {
+  color: #667eea;
+  text-shadow:
+    1px 1px 0 #5a67d8,
+    2px 2px 0 #4c51bf,
+    3px 3px 0 #434190,
+    4px 4px 0 #3c366b,
+    5px 5px 10px rgba(0, 0, 0, 0.3);
+  transform: perspective(500px) rotateX(15deg);
+}
+
+.text-3d-neon {
+  color: #667eea;
+  text-shadow:
+    0 0 5px #667eea,
+    0 0 10px #667eea,
+    0 0 15px #667eea,
+    0 0 20px #667eea,
+    0 0 35px #667eea,
+    0 0 40px #667eea;
+  animation: neonFlicker 2s infinite alternate;
+}
+
+@keyframes neonFlicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    text-shadow:
+      0 0 5px #667eea,
+      0 0 10px #667eea,
+      0 0 15px #667eea,
+      0 0 20px #667eea,
+      0 0 35px #667eea,
+      0 0 40px #667eea;
+  }
+  20%, 24%, 55% {
+    text-shadow: none;
+  }
+}
+
+/* ============================================
+   3D层叠卡片
+============================================ */
+.stack-3d {
+  position: relative;
+  width: 300px;
+  height: 200px;
+  perspective: 1000px;
+  margin: 50px auto;
+}
+
+.stack-3d-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-3d-moderate);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.stack-3d-card:nth-child(1) {
+  transform: translateZ(0px) rotateX(0deg);
+  z-index: 3;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.stack-3d-card:nth-child(2) {
+  transform: translateZ(-20px) rotateX(-5deg) translateY(10px);
+  z-index: 2;
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.stack-3d-card:nth-child(3) {
+  transform: translateZ(-40px) rotateX(-10deg) translateY(20px);
+  z-index: 1;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.stack-3d:hover .stack-3d-card:nth-child(1) {
+  transform: translateZ(20px) rotateX(5deg) translateY(-10px);
+}
+
+.stack-3d:hover .stack-3d-card:nth-child(2) {
+  transform: translateZ(0px) rotateX(0deg) translateY(0px);
+}
+
+.stack-3d:hover .stack-3d-card:nth-child(3) {
+  transform: translateZ(-20px) rotateX(-5deg) translateY(10px);
+}
+
+/* ============================================
+   3D翻页效果
+============================================ */
+.page-flip-3d {
+  position: relative;
+  width: 400px;
+  height: 300px;
+  perspective: 1500px;
+  margin: 50px auto;
+}
+
+.page-3d {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 1s ease-in-out;
+}
+
+.page-left {
+  left: 0;
+  transform-origin: right center;
+}
+
+.page-right {
+  right: 0;
+  transform-origin: left center;
+}
+
+.page-front,
+.page-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-3d-moderate);
+}
+
+.page-front {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.page-back {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.page-flip-3d:hover .page-left {
+  transform: rotateY(-25deg);
+}
+
+.page-flip-3d:hover .page-right {
+  transform: rotateY(25deg);
+}
+
+/* ============================================
+   3D悬浮粒子效果
+============================================ */
+.particles-3d {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.particle-3d {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #667eea;
+  border-radius: 50%;
+  animation: floatParticle 6s infinite linear;
+}
+
+.particle-3d:nth-child(odd) {
+  background: #f093fb;
+  animation-duration: 8s;
+}
+
+.particle-3d:nth-child(3n) {
+  background: #4facfe;
+  animation-duration: 10s;
+}
+
+@keyframes floatParticle {
+  0% {
+    transform: 
+      translateX(0) 
+      translateY(100vh) 
+      translateZ(0) 
+      rotateX(0deg) 
+      rotateY(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: 
+      translateX(100px) 
+      translateY(-100px) 
+      translateZ(200px) 
+      rotateX(360deg) 
+      rotateY(360deg);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   3D波浪效果
+============================================ */
+.wave-3d {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  overflow: hidden;
+}
+
+.wave-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  animation: wave3D 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes wave3D {
+  0%, 100% {
+    transform: perspective(500px) rotateX(0deg) rotateY(0deg) scale(1);
+  }
+  25% {
+    transform: perspective(500px) rotateX(5deg) rotateY(5deg) scale(1.05);
+  }
+  50% {
+    transform: perspective(500px) rotateX(10deg) rotateY(-5deg) scale(1.1);
+  }
+  75% {
+    transform: perspective(500px) rotateX(-5deg) rotateY(10deg) scale(1.05);
+  }
+}
+
+/* ============================================
+   3D菜单效果
+============================================ */
+.menu-3d {
+  display: flex;
+  gap: 20px;
+  perspective: 1000px;
+}
+
+.menu-3d-item {
+  padding: 15px 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-3d-subtle);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.menu-3d-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: inherit;
+  transform: translateZ(-1px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu-3d-item:hover {
+  transform: perspective(500px) rotateX(-10deg) translateY(-5px) translateZ(10px);
+  box-shadow: var(--shadow-3d-dramatic);
+  color: white;
+}
+
+.menu-3d-item:hover::before {
+  opacity: 1;
+}
+
+/* ============================================
+   3D加载动画
+============================================ */
+.loader-3d {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rotateLoader 2s infinite linear;
+  margin: 50px auto;
+}
+
+.loader-3d-face {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  opacity: 0.8;
+}
+
+.loader-3d-face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(30px);
+}
+
+.loader-3d-face:nth-child(2) {
+  transform: rotateY(90deg) translateZ(30px);
+}
+
+.loader-3d-face:nth-child(3) {
+  transform: rotateY(180deg) translateZ(30px);
+}
+
+.loader-3d-face:nth-child(4) {
+  transform: rotateY(270deg) translateZ(30px);
+}
+
+.loader-3d-face:nth-child(5) {
+  transform: rotateX(90deg) translateZ(30px);
+}
+
+.loader-3d-face:nth-child(6) {
+  transform: rotateX(-90deg) translateZ(30px);
+}
+
+@keyframes rotateLoader {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  100% {
+    transform: rotateX(360deg) rotateY(360deg);
+  }
+}
+
+/* ============================================
+   响应式3D效果
+============================================ */
+@media (max-width: 768px) {
+  .perspective-container {
+    perspective: var(--perspective-near);
+  }
+  
+  .card-3d {
+    height: 250px;
+  }
+  
+  .text-3d {
+    font-size: 2.5rem;
+  }
+  
+  .cube-3d {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .cube-face {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .gallery-3d-item {
+    width: 200px;
+    height: 280px;
+  }
+  
+  .stack-3d {
+    width: 250px;
+    height: 160px;
+  }
+  
+  .page-flip-3d {
+    width: 300px;
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-3d-hover:hover {
+    transform: perspective(800px) rotateX(3deg) rotateY(3deg) translateZ(15px);
+  }
+  
+  .btn-3d:hover {
+    transform: perspective(400px) rotateX(-3deg) translateY(-1px) translateZ(5px);
+  }
+  
+  .text-3d {
+    font-size: 2rem;
+  }
+  
+  .cube-3d {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .cube-face {
+    width: 100px;
+    height: 100px;
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   性能优化
+============================================ */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.reduce-motion {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-3d,
+  .btn-3d,
+  .cube-3d,
+  .gallery-3d-item,
+  .stack-3d-card,
+  .page-3d,
+  .particle-3d,
+  .loader-3d {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ============================================
+   3D工具类
+============================================ */
+.rotate-x-5 {
+  transform: rotateX(5deg);
+}
+
+.rotate-x-10 {
+  transform: rotateX(10deg);
+}
+
+.rotate-x-15 {
+  transform: rotateX(15deg);
+}
+
+.rotate-y-5 {
+  transform: rotateY(5deg);
+}
+
+.rotate-y-10 {
+  transform: rotateY(10deg);
+}
+
+.rotate-y-15 {
+  transform: rotateY(15deg);
+}
+
+.translate-z-10 {
+  transform: translateZ(10px);
+}
+
+.translate-z-20 {
+  transform: translateZ(20px);
+}
+
+.translate-z-30 {
+  transform: translateZ(30px);
+}
+
+.scale-3d-105 {
+  transform: scale3d(1.05, 1.05, 1.05);
+}
+
+.scale-3d-110 {
+  transform: scale3d(1.1, 1.1, 1.1);
+}
+
+.scale-3d-125 {
+  transform: scale3d(1.25, 1.25, 1.25);
+}

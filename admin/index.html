@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 蓝柚</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            transition: transform 0.3s ease;
+        }
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 4px solid #3b82f6;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-completed {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 头部导航 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-gray-700 mr-4">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800">蓝柚管理后台</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- 通知 -->
+                    <div class="relative">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">3</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 用户菜单 -->
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>管理员</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">个人设置</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">系统设置</a>
+                            <hr class="my-1">
+                            <a href="../index.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">返回前台</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" onclick="logout()">退出登录</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- 侧边栏 -->
+        <div id="sidebar" class="sidebar w-64 fixed md:relative h-screen z-30 text-white">
+            <div class="p-6">
+                <!-- 导航菜单 -->
+                <nav class="space-y-2">
+                    <a href="#" class="sidebar-item active flex items-center px-4 py-3 rounded-lg" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt w-5"></i>
+                        <span class="ml-3">仪表盘</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="bookings">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span class="ml-3">预约管理</span>
+                        <span class="ml-auto bg-red-500 text-white rounded-full px-2 py-1 text-xs">5</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="users">
+                        <i class="fas fa-users w-5"></i>
+                        <span class="ml-3">用户管理</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="photographers">
+                        <i class="fas fa-camera w-5"></i>
+                        <span class="ml-3">摄影师管理</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="services">
+                        <i class="fas fa-cogs w-5"></i>
+                        <span class="ml-3">服务管理</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="gallery">
+                        <i class="fas fa-images w-5"></i>
+                        <span class="ml-3">作品管理</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="reviews">
+                        <i class="fas fa-star w-5"></i>
+                        <span class="ml-3">评价管理</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="analytics">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span class="ml-3">数据分析</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center px-4 py-3 rounded-lg" data-section="settings">
+                        <i class="fas fa-cog w-5"></i>
+                        <span class="ml-3">系统设置</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 p-6">
+            <!-- 仪表盘 -->
+            <div id="dashboard" class="content-section active">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">仪表盘</h2>
+                
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card stat-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-100 text-sm">今日预约</p>
+                                <p class="text-3xl font-bold">12</p>
+                            </div>
+                            <i class="fas fa-calendar-check text-4xl text-blue-200"></i>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <i class="fas fa-arrow-up text-green-300 mr-1"></i>
+                            <span class="text-green-300 text-sm">+15% 比昨日</span>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card success p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-green-100 text-sm">本月收入</p>
+                                <p class="text-3xl font-bold">¥28,650</p>
+                            </div>
+                            <i class="fas fa-coins text-4xl text-green-200"></i>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <i class="fas fa-arrow-up text-green-300 mr-1"></i>
+                            <span class="text-green-300 text-sm">+23% 比上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card warning p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-yellow-100 text-sm">待处理预约</p>
+                                <p class="text-3xl font-bold">5</p>
+                            </div>
+                            <i class="fas fa-clock text-4xl text-yellow-200"></i>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-300 mr-1"></i>
+                            <span class="text-yellow-300 text-sm">需要处理</span>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card danger p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-red-100 text-sm">活跃用户</p>
+                                <p class="text-3xl font-bold">1,234</p>
+                            </div>
+                            <i class="fas fa-users text-4xl text-red-200"></i>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <i class="fas fa-arrow-up text-red-300 mr-1"></i>
+                            <span class="text-red-300 text-sm">+8% 比上月</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">预约趋势</h3>
+                        <canvas id="bookingChart" height="200"></canvas>
+                    </div>
+                    
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">服务类型分布</h3>
+                        <canvas id="serviceChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">最新预约</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">张小姐</p>
+                                        <p class="text-sm text-gray-600">轻写真 - 2024-03-25 14:00</p>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-pending">待确认</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">李先生</p>
+                                        <p class="text-sm text-gray-600">证件照 - 2024-03-24 10:00</p>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-confirmed">已确认</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">系统通知</h3>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                <p class="text-sm text-blue-800">新用户注册：王小明</p>
+                                <p class="text-xs text-blue-600 mt-1">2小时前</p>
+                            </div>
+                            
+                            <div class="p-3 bg-green-50 border-l-4 border-green-400 rounded">
+                                <p class="text-sm text-green-800">预约完成：证件照拍摄</p>
+                                <p class="text-xs text-green-600 mt-1">3小时前</p>
+                            </div>
+                            
+                            <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                                <p class="text-sm text-yellow-800">设备维护提醒：相机需要保养</p>
+                                <p class="text-xs text-yellow-600 mt-1">1天前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预约管理 -->
+            <div id="bookings" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">预约管理</h2>
+                
+                <!-- 筛选器 -->
+                <div class="card p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">状态筛选</label>
+                            <select class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                <option value="">全部状态</option>
+                                <option value="pending">待确认</option>
+                                <option value="confirmed">已确认</option>
+                                <option value="completed">已完成</option>
+                                <option value="cancelled">已取消</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">服务类型</label>
+                            <select class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                <option value="">全部服务</option>
+                                <option value="id-photo">证件照</option>
+                                <option value="portrait">轻写真</option>
+                                <option value="wedding">结婚登记照</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">日期筛选</label>
+                            <input type="date" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-search mr-2"></i>搜索
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 预约列表 -->
+                <div class="table-container">
+                    <table class="table w-full">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-4 text-left">预约编号</th>
+                                <th class="px-6 py-4 text-left">客户信息</th>
+                                <th class="px-6 py-4 text-left">服务类型</th>
+                                <th class="px-6 py-4 text-left">预约时间</th>
+                                <th class="px-6 py-4 text-left">摄影师</th>
+                                <th class="px-6 py-4 text-left">状态</th>
+                                <th class="px-6 py-4 text-left">金额</th>
+                                <th class="px-6 py-4 text-left">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t">
+                                <td class="px-6 py-4">#20240001</td>
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-semibold">张小姐</p>
+                                        <p class="text-sm text-gray-600">13812345678</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">轻写真</td>
+                                <td class="px-6 py-4">2024-03-25 14:00</td>
+                                <td class="px-6 py-4">李老师</td>
+                                <td class="px-6 py-4">
+                                    <span class="status-badge status-pending">待确认</span>
+                                </td>
+                                <td class="px-6 py-4">¥398</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800" title="确认">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="text-green-600 hover:text-green-800" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800" title="取消">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr class="border-t">
+                                <td class="px-6 py-4">#20240002</td>
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-semibold">李先生</p>
+                                        <p class="text-sm text-gray-600">13987654321</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">证件照</td>
+                                <td class="px-6 py-4">2024-03-24 10:00</td>
+                                <td class="px-6 py-4">王老师</td>
+                                <td class="px-6 py-4">
+                                    <span class="status-badge status-confirmed">已确认</span>
+                                </td>
+                                <td class="px-6 py-4">¥88</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800" title="查看">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-green-600 hover:text-green-800" title="完成">
+                                            <i class="fas fa-check-circle"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <div class="flex justify-between items-center mt-6">
+                    <div class="text-gray-600">
+                        显示 1-10 条，共 25 条记录
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-2 border rounded hover:bg-gray-50">上一页</button>
+                        <button class="px-3 py-2 bg-blue-600 text-white rounded">1</button>
+                        <button class="px-3 py-2 border rounded hover:bg-gray-50">2</button>
+                        <button class="px-3 py-2 border rounded hover:bg-gray-50">3</button>
+                        <button class="px-3 py-2 border rounded hover:bg-gray-50">下一页</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他内容区域占位 -->
+            <div id="users" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">用户管理</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-users text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">用户管理功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="photographers" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">摄影师管理</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-camera text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">摄影师管理功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="services" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">服务管理</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-cogs text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">服务管理功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="gallery" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">作品管理</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-images text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">作品管理功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="reviews" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">评价管理</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-star text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">评价管理功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="analytics" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">数据分析</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-chart-line text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">数据分析功能开发中...</p>
+                </div>
+            </div>
+
+            <div id="settings" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">系统设置</h2>
+                <div class="card p-8 text-center">
+                    <i class="fas fa-cog text-gray-400 text-6xl mb-4"></i>
+                    <p class="text-gray-600">系统设置功能开发中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移动端遮罩 -->
+    <div id="mobileOverlay" class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20 hidden"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="../js/advanced.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdmin();
+        });
+
+        function initializeAdmin() {
+            // 侧边栏导航
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除活动状态
+                    sidebarItems.forEach(si => si.classList.remove('active'));
+                    contentSections.forEach(cs => cs.classList.remove('active'));
+                    
+                    // 添加活动状态
+                    this.classList.add('active');
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        document.getElementById(sectionId).classList.add('active');
+                    }
+                    
+                    // 移动端关闭侧边栏
+                    if (window.innerWidth < 768) {
+                        document.getElementById('sidebar').classList.remove('open');
+                        document.getElementById('mobileOverlay').classList.add('hidden');
+                    }
+                });
+            });
+
+            // 移动端侧边栏
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.add('open');
+                mobileOverlay.classList.remove('hidden');
+            });
+            
+            mobileOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                mobileOverlay.classList.add('hidden');
+            });
+
+            // 初始化图表
+            initializeCharts();
+        }
+
+        function initializeCharts() {
+            // 预约趋势图
+            const bookingCtx = document.getElementById('bookingChart').getContext('2d');
+            new Chart(bookingCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: '预约数量',
+                        data: [65, 78, 95, 120, 140, 168],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 服务类型分布图
+            const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+            new Chart(serviceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['证件照', '轻写真', '结婚登记照'],
+                    datasets: [{
+                        data: [45, 35, 20],
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('adminToken');
+                window.location.href = '../login.html';
+            }
+        }
+
+        // 检查管理员权限
+        function checkAdminAccess() {
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                // 这里应该重定向到管理员登录页面
+                // window.location.href = 'admin-login.html';
+            }
+        }
+
+        // 页面加载时检查权限
+        // checkAdminAccess();
+    </script>
+</body>
+</html>
+
